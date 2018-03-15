@@ -25,7 +25,7 @@ class AttendanceRecord(db.Model):
     type_code = db.Column(db.Integer, nullable=False)
 
 
-def sync(progress=False, force_all=False):
+def sync(progress=False, force_all=False, israw=False):
     config = ConfigParser()
     config.read('anviz-sync.ini')
 
@@ -48,48 +48,55 @@ def sync(progress=False, force_all=False):
         only_new = True
 
     if progress:
-        total = getattr(clock.get_record_info(),
-                        'new_records' if only_new else 'all_records')
+        total = getattr(clock.get_record_info(), 'new_records' if only_new else 'all_records')
         pbar = ProgressBar("sync [{}]".format(ip_addr), total)
-    else:
-        pbar = ProgressDummy()
+        act_name = ('new' if only_new else 'all') + ' records'
+        act_col = 'green' if only_new else 'red'
 
-    act_name = ('new' if only_new else 'all') + ' records'
-    act_col = 'green' if only_new else 'red'
-
-    pbar.set_activity(act_name, act_col)
-    pbar.step(0)
+        pbar.set_activity(act_name, act_col)
+        pbar.step(0)
 
     for record in clock.download_records(only_new):
-        user_record = AttendanceRecord(
-                user_code=record.code,
-                datetime=record.datetime,
-                bkp_type=record.bkp,
-                type_code=record.type
-        )
 
-        # check that record don't exist in db
-        count = AttendanceRecord.query.filter(AttendanceRecord.user_code==record.code)\
-                                .filter(AttendanceRecord.datetime==record.datetime)\
-                                .count()
-        if count == 0:
-            # store
-            db.add(user_record)
+        if israw:
+            print( record.code, '|', record.datetime, '|', record.bkp, '|', record.type )
         else:
-            # discard
-            pass
-        pbar.step()
+            user_record = AttendanceRecord(
+                    user_code = record.code,
+                    datetime  = record.datetime,
+                    bkp_type  = record.bkp,
+                    type_code = record.type
+            )
 
-    db.commit()
-    pbar.finish('synced')
+            # check that record don't exist in db
+            count = AttendanceRecord.query.filter(AttendanceRecord.user_code==record.code)\
+                                    .filter(AttendanceRecord.datetime==record.datetime)\
+                                    .count()
+            if count == 0:
+                # store
+                db.add(user_record)
+            else:
+                # discard
+                pass
+
+            pbar.step()
+            db.commit()          
+
+    if not israw:
+        pbar.finish('synced')
 
 
 def main():
     import sys
+
     progress = '--no-progress' not in sys.argv
     force_all = '--all' in sys.argv
-    sync(progress=progress, force_all=force_all)
+    israw = '--raw' in sys.argv
 
+    if israw:
+        progress=False
+
+    sync(progress=progress, force_all=force_all, israw=israw)
 
 if __name__ == '__main__':
     main()

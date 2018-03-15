@@ -11,3 +11,16 @@ The functionality is still limited but the main use cases are supported
 (set/get device time, get record information, download records)
 
 Tested with Anviz A300.
+
+
+use:
+
+# setup.py build
+# setup.py install
+
+to generate EGG file.
+
+then copy the generated anviz-sync executable to proyect folder.
+
+There you go!
+
