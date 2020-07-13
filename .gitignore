@@ -1,16 +1,9 @@
-# Byte-compiled
-__pycache__/
-*.py[cod]
-
-*.swp
-*.mo
-*.db
-*.sqlite3
-
-build/
-dist/
-eggs/
-*.egg-info/
-*.egg
-
-docs/_build/
+*.gitignore
+*.dump
+*.pyc
+.idea/
+password.txt
+*.log
+Luca/Odoo/Pretecno/Docker-Backup-20200321/
+*.gz
+*.tar

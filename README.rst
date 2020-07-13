@@ -15,8 +15,8 @@ Tested with Anviz A300.
 
 use:
 
-# setup.py build
-# setup.py install
+# python3 setup.py build
+# python3 setup.py install
 
 to generate EGG file.
 
